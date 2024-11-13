@@ -5,7 +5,7 @@ import Buttons from "../Buttons/Buttons";
 import { Cell as CellType, SelectedCell, Move } from "../../types/Board";
 import { getConflictsCells, checkSolution } from "../../utils/validator";
 import { generateNewGame, difficultyLevels, solveBoard, BoardWithHint, printBoard } from "../../utils/generator";
-import { FaCheckCircle, FaEdit, FaGamepad, FaPlayCircle, FaQuestionCircle } from "react-icons/fa";
+import { FaCheck, FaCheckCircle, FaEdit, FaGamepad, FaPlayCircle, FaQuestionCircle, FaUndo } from "react-icons/fa";
 import { MdCelebration } from "react-icons/md";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -217,10 +217,10 @@ const Board: React.FC<BoardProps> = ({ difficulty }) => {
       <Buttons onNumberClick={handleNumberClick} />
       <div className="board-tools">
         <button className="button undo-btn" onClick={handleUndoButton}>
-          <i className="fas fa-undo"></i> Undo
+          <FaUndo style={{position: 'relative', bottom: '-2px'}}/> Undo
         </button>
         <button className="button check-but" disabled={isEditMode || isSubmitMode} onClick={handleCheckSolution}>
-          <i className="fas fa-check"></i> Check Solution
+          <FaCheck style={{position: 'relative', bottom: '-2px'}}/> Check Solution
         </button>
         <button className="button newgame-btn" onClick={handleNewGameClick}>
           {" "}
