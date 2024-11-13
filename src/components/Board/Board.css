@@ -1,0 +1,70 @@
+.container {
+	display: flex;
+	justify-content: center;
+	flex-direction: column;
+	align-items: center;
+	flex: 1;
+}
+
+.board {
+	width: fit-content;
+	border: 3px solid var(--board-border, black);
+	border-radius: 5px;
+	margin: 15px auto 0 auto;
+	box-shadow: rgba(100, 100, 100, 0.5) 0px 0px 100px;
+}
+
+.board-tools {
+	display: flex;
+	justify-content: center;
+	flex-wrap: wrap;
+	column-gap: 10px;
+}
+
+.board-tools .button {
+	width: fit-content;
+}
+
+.hint-btn {
+	position: relative;
+}
+
+.hint-btn::after {
+	content: attr(prefix);
+	position: absolute;
+    top: -5px;
+    right: -11px;
+    border-radius: 50%;
+    background: red;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+}
+
+/* .no-hints {
+	opacity: 0.5;
+} */
+
+.button:disabled {
+	background-color: var(--main-color);
+	opacity: 0.5;
+}
+
+@media (max-width: 767px) {
+	.container {
+		margin-top: -80px;
+	}
+
+	.board .cell {
+		width: 35px;
+		height: 35px;
+	}
+
+	.board-tools button {
+		font-size: 16px;
+	}
+
+}

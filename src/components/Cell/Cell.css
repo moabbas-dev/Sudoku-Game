@@ -1,0 +1,71 @@
+.cell {
+	width: 40px;
+	height: 40px;
+	text-align: center;
+	font-size: 22px;
+	border: 1px solid #888;
+	cursor: pointer;
+	color: var(--main-color);
+	font-weight: bold;
+	transition: 0.3s;
+	border-radius: 2px;
+}
+
+.cell::selection {
+	display: none;
+}
+
+.cell:hover {
+	background-color: #ccc;
+}
+
+.cell:focus {
+	transition: 0.7s;
+	background-color: var(--main-color);
+	outline: none;
+	caret-color: transparent;
+}
+
+.cell:enabled {
+	transition: 0.3s;
+}
+
+.main-border-right {
+	border-right: 3px solid var(--board-border, black);
+}
+
+.main-border-bottom {
+	border-bottom: 3px solid var(--board-border, black);
+}
+
+.common-border {
+	border-right: 1px solid #888;
+}
+
+.selected {
+	background-color:var(--main-color);
+}
+
+.has-conflict {
+	background-color: rgb(255, 25, 25);
+}
+
+.highlited {
+	background-color: #ccc;
+}
+
+.num-highlite {
+	background-color: #ddd2d2;
+}
+
+.selected-conflict-editable {
+	color: white;
+}
+
+.not-editable {
+	color: var(--board-border, black);
+}
+
+.common-editable {
+	color: var(--main-color);
+}

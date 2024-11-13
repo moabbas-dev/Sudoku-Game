@@ -1,0 +1,44 @@
+.dropdown-btn {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	width: fit-content;
+	padding: 0.6rem;
+	background-color: white;
+	border-radius: 0.5rem;
+	box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+	cursor: pointer;
+	width: 100%;
+	background-color: var(--main-color);
+	color: white;
+	font-size: 1.2vw;
+	font-weight: bold;
+	transition: 0.7s;
+}
+
+.dropdown-btn::selection {
+	display: none;
+}
+
+@media (max-width: 992px) {
+	.dropdown-btn {
+		font-size: 2.6vh;
+	}
+}
+
+@media (max-width: 768px) {
+	.dropdown-btn {
+		font-size: 2.3vh;
+	}
+}
+
+.toggle-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-left: 1rem;
+}
+
+.button-open {
+	border: rgb(147, 197, 253) 2px solid;
+}

@@ -1,0 +1,31 @@
+.dropdown {
+	width: 30%;
+	color: var(--main-color);
+	font-size: 1.1vw;
+	position: absolute;
+}
+
+@media (max-width: 991px) {
+	.dropdown {
+		font-size: 2.6vh;
+	}
+}
+
+@media (max-width: 767px) {
+	.dropdown {
+		font-size: 2.3vh;
+		width: fit-content;
+	}
+}
+
+/* choose-color [Custom dropdown] */
+.choose-color {
+	width: 150px;
+	left: 20px;
+}  
+
+/* difficulty [Custom dropdown] */
+.difficulty {
+	width: 145px;
+	right: 20px;
+}
