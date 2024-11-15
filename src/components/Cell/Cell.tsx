@@ -36,8 +36,7 @@ const Cell: React.FC<CellProps> = ({
 			onChange(null);
 		else if (!isNaN(parsedValue) && parsedValue >= 1 && parsedValue <= 9)
 			onChange(parsedValue); 
-		console.log(parsedValue);
-
+		// console.log(parsedValue);
 	};
 
 	const handleFocus = (event:FocusEvent<HTMLInputElement>) => {

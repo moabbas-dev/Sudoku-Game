@@ -1,8 +1,10 @@
 .dropdown {
 	width: 30%;
+	text-wrap: nowrap;
 	color: var(--main-color);
 	font-size: 1.1vw;
 	position: absolute;
+	min-width: fit-content;
 }
 
 @media (max-width: 991px) {
