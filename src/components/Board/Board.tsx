@@ -252,7 +252,7 @@ const Board: React.FC<BoardProps> = ({ difficulty }) => {
   
     return grid;
   };
-  
+
   const validateSudokuGrid = (grid: (number | null)[][]): boolean => {
     if (grid.length !== 9)
       return false;
