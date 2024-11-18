@@ -17,7 +17,7 @@ This project showcases:
 ## **Features**
 1. **Play Mode**: Play Sudoku with difficulty levels ranging from `Very Easy` to `Expert`.
 2. **Manual Solver**: Enter a custom Sudoku board and solve it.
-3. **Image-Based Solver**:
+3. **Image-Based Solver**: // Note that this feature won't work properly so if you can help me in it i'll apreciate it too :)
    - Upload an image of a Sudoku board.
    - Process and recognize the grid using OCR.
    - Solve the recognized grid.
