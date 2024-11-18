@@ -35,7 +35,7 @@ const Cell: React.FC<CellProps> = ({
 		if (inputValue === '' || parsedValue === 0)
 			onChange(null);
 		else if (!isNaN(parsedValue) && parsedValue >= 1 && parsedValue <= 9)
-			onChange(parsedValue); 
+			onChange(parsedValue);
 		// console.log(parsedValue);
 	};
 

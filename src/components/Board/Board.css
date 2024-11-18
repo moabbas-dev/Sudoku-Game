@@ -10,7 +10,7 @@
 	width: fit-content;
 	border: 3px solid var(--board-border, black);
 	border-radius: 5px;
-	margin: 15px auto 0 auto;
+	margin: -5px auto 0 auto;
 	box-shadow: rgba(100, 100, 100, 0.5) 0px 0px 100px;
 }
 
@@ -49,13 +49,10 @@
 	display: none;
 }
 
-/* .no-hints {
-	opacity: 0.5;
-} */
-
 .button:disabled {
 	background-color: var(--main-color);
 	opacity: 0.5;
+	cursor: not-allowed;
 }
 
 .upload-btn {
@@ -65,9 +62,20 @@
     padding: 0 7px;
 }
 
+.time {
+	border-bottom: 3px solid var(--board-border, black);
+    width: 100%;
+    display: grid;
+    place-items: center;
+}
+
 @media (max-width: 767px) {
 	.container {
 		margin-top: -80px;
+	}
+
+	.board {
+		margin: 60px auto 0 auto;
 	}
 
 	.board .cell {

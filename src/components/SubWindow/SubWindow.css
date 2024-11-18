@@ -37,15 +37,14 @@
 
 .close-icon {
 	position: absolute;
-	right: 20px;
-	top: 20px;
+	right: 10px;
+	top: 10px;
 	font-size: 30px;
 	cursor: pointer;
 }
 
 .sub-window .grid-icon {
 	font-size: 10vw;
-
 }
 
 .sub-window .check-icon {

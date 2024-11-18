@@ -4,13 +4,14 @@ import SubWindow from "../SubWindow/SubWindow";
 import Buttons from "../Buttons/Buttons";
 import { Cell as CellType, SelectedCell, Move } from "../../types/Board";
 import { getConflictsCells, checkSolution } from "../../utils/validator";
-import { generateNewGame, difficultyLevels, solveBoard, BoardWithHint } from "../../utils/generator";
-import { FaCheck, FaCheckCircle, FaEdit, FaGamepad, FaMehBlank, FaPlayCircle, FaQuestionCircle, FaSpaceShuttle, FaUndo, FaUpload } from "react-icons/fa";
+import { generateNewGame, difficultyLevels, solveBoard, BoardWithHint, cleanBoard } from "../../utils/generator";
+import { FaCheck, FaCheckCircle, FaEdit, FaGamepad, FaPlayCircle, FaQuestionCircle, FaUndo, FaUpload } from "react-icons/fa";
 import { MdCelebration } from "react-icons/md";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./Board.css";
 import Tesseract from "tesseract.js";
+import {Jimp, JimpMime} from 'jimp';
 
 interface BoardProps {
   difficulty: keyof typeof difficultyLevels;
@@ -29,30 +30,68 @@ const Board: React.FC<BoardProps> = ({ difficulty }) => {
   const [isSubmitMode, setSubmitMode] = useState<boolean>(false)
   const [undoStack, setUndoStack] = useState<Move[]>([])
   const [isDisabledHint, setDisableHint] = useState<boolean>(false)
-  const defaultTries = 5
+  const defaultTries = 3
   const [tries, setTries] = useState<number>(defaultTries)
+  const [time, setTime] = useState<string>("00:00")
+  const [elapsedSeconds, setElapsedSeconds] = useState<number>(0);
+  const [isGameActive, setIsGameActive] = useState<boolean>(false);
 
-  // Handlers
+  // Handle Game Timer
+  useEffect(() => {
+    let timer: NodeJS.Timer | null = null;
+    if (isGameActive) 
+      timer = setInterval(() => { setElapsedSeconds((prev) => prev + 1)}, 1000);
+    return () => {
+      if (timer) clearInterval(timer)
+    }
+  }, [isGameActive]);
+
+  useEffect(() => {
+    const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, "0");
+    const seconds = (elapsedSeconds % 60).toString().padStart(2, "0");
+    setTime(`${minutes}:${seconds}`);
+  }, [elapsedSeconds]);
+
+  const GameTimerStart = () => {
+    setIsGameActive(true);
+    setElapsedSeconds(0);
+  };
+
+  const GameTimerEnd = () => {
+    setIsGameActive(false);
+  };
+
+  // repetitve code
+  const setDefaultActions = () => {
+    setSubmitMode(false)
+    setEditMode(false)
+    setDisableHint(false)
+    setTries(defaultTries)
+    GameTimerStart()
+  }
+
+  // [Handler]: click on a cell
   const handleCellClick = (row: number, col: number, value: number | null) => {
     setSelectedCell({ row, col, value });
     // console.log(row +', '+col)
   };
 
+  // [Handler]: click on a number from 1 to 9
   const handleNumberClick = (number: number) => {
-    if (selectedCell) {
-      const { row, col } = selectedCell;
-      if (board[row][col].isEditable) {
-        setUndoStack(prevStack => [...prevStack, { row, col, previousValue:selectedCell.value }]);
+    if (selectedCell && board[selectedCell.row][selectedCell.col].isEditable) {
+        setUndoStack(prevStack => 
+          [...prevStack,  { row: selectedCell.row, col: selectedCell.col, previousValue:selectedCell.value }]
+        )
         const updatedBoard = board.map((r, rIdx) =>
           r.map((cell, cIdx) =>
-            rIdx === row && cIdx === col ? { ...cell, value: number } : cell
+            rIdx === selectedCell.row && cIdx === selectedCell.col ? { ...cell, value: number } : cell
           )
         );
         setBoard(updatedBoard);
-      }
     }
   };
 
+  // [Handler]: when the input cell change
   const handleChange = (rowIndex: number,colIndex: number,newValue: number | null) => {
     const previousValue = board[rowIndex][colIndex].value;
     setUndoStack(prevStack => [...prevStack, { row: rowIndex, col: colIndex, previousValue }]);
@@ -64,21 +103,25 @@ const Board: React.FC<BoardProps> = ({ difficulty }) => {
     setBoard(updatedBoard);
   };
 
+  // [Handler]: click on the 'Check Solution' button
   const handleCheckSolution = () => {
     const solved = checkSolution(board);
     setIsSolved(solved);
-    let notComplete = false;
+    let notCompleted = false;
     board.forEach((row) => {
       row.forEach((col) => {
-        if (col.isEditable && col.value === null) notComplete = true;
+        if (col.isEditable && col.value === null) notCompleted = true;
       });
     });
-    if (!solved && notComplete)
+    if (!solved && notCompleted)
       toast.error("Please Fill the entire board and try again", {className:"toast-error"});
     else if (!solved)
       toast.error("The solution is incorrect. Please try again.", {className:"toast-error"});
+    else if (solved)
+      GameTimerEnd()
   };
 
+  // [Handler]: click on the 'Undo' button
   const handleUndoButton = () => {
     if (undoStack.length === 0)
       return;
@@ -92,42 +135,44 @@ const Board: React.FC<BoardProps> = ({ difficulty }) => {
     setBoard(updatedBoard)
   };
 
+  // [Handler]: click on the 'New Game' button
   const handleNewGameClick = () => {
     const newBoard = generateNewGame(difficulty);
     setBoard(newBoard);
     if (isEditMode) {
       toast.info("You are in Play Mode", {className:"toast-info"})
-      setEditMode(false)
     }
-    setSubmitMode(false)
-    setTries(defaultTries)
-    setDisableHint(false)
+    setDefaultActions()
   };
 
+  // [Handler]: click on the 'close the sub-window when user win'
   const handleCloseWin = () => {
     setIsSolved(false);
     setBoard(generateNewGame(difficulty));
     setSubmitMode(false)
+    GameTimerStart()
   };
 
-  //  Call this function when difficulty changes
+  // when difficulty changes
   useEffect(() => {
     const newBoard = generateNewGame(difficulty);
     setBoard(newBoard);
-    setSubmitMode(false)
-    setEditMode(false)
-    setTries(defaultTries)
-    setDisableHint(false)
+    setDefaultActions()
   }, [difficulty]);
 
+  // [Handler]: click on the 'Enter Board' button
   const handleEnterBoardMode = () => {
     setBoard(initialBoard)
     setEditMode(true)
     setSubmitMode(false)
-    toast.info("You are in Edit Mode", {className:"toast-info"})
     setDisableHint(true)
+    GameTimerEnd()
+    setTime("00:00")
+    setUndoStack((prevStack) => prevStack.slice(0, 0))
+    toast.info("You are in Edit Mode", {className:"toast-info"})
   }
 
+  // [Handler]: click on the 'Submit' button
   const handleSubmitBoard = () => {
     const isEmptyBoard = board.every(row => row.every(cell => cell.value === null))
     if (isEmptyBoard) {
@@ -136,7 +181,7 @@ const Board: React.FC<BoardProps> = ({ difficulty }) => {
     }
     let hasConflict = board.some((row, rowIndex) =>
       row.some((_, colIndex) =>
-        getConflictsCells(board).has(`${rowIndex}-${colIndex}`) 
+        getConflictsCells(board).has(`${rowIndex}-${colIndex}`)
     ))
     if (hasConflict) {
       toast.error("Your Board is Invalid", {className:"toast-error"})
@@ -148,13 +193,12 @@ const Board: React.FC<BoardProps> = ({ difficulty }) => {
       )
     )
     setBoard(updatedBoard)
-    setEditMode(false)
+    setDefaultActions()
     setSubmitMode(true)
     toast.info("You are in Play Mode", {className:"toast-info"})
-    setTries(defaultTries)
-    setDisableHint(false)
   }
 
+  // [Handler]: click on the 'hint' button
   const handleHints = ()=> {
     if (checkSolution(board))
       return ;
@@ -171,76 +215,95 @@ const Board: React.FC<BoardProps> = ({ difficulty }) => {
     setBoard(HintedBoard)
   }
 
+  // [Handler]: click on the 'solve' button
   const handleSolveBtn = () => {
     setSubmitMode(false)
-    const updatedBoard = solveBoard(board)
+    const updatedBoard = solveBoard(cleanBoard(board))
     setBoard(updatedBoard)
     setTries(defaultTries)
+    GameTimerEnd()
   }
-  // =====================================================================================
-  const parseOcrToGrid = (ocrText: string): (number | null)[][] => {
-      const rows = ocrText
-      .split("\n")
-      .filter((line) => line.trim() !== "")
-      .slice(0, 9);
-    const grid = rows.map((row) =>
-      row
-        .split("") // Split the row into individual characters
-        .map((char) =>
-          /[1-9]/.test(char) ? parseInt(char) : null // Convert numbers to integers, others to null
-        )
-    );
+
+  // =============================== Stretch Goal ==============================
+  const extractGridFromOCR = (data: any, gridWidth: number, gridHeight: number): (number | null)[][] => {
+    const grid = Array.from({ length: 9 }, () => Array(9).fill(null));
+  
+    // Calculate cell dimensions
+    const cellWidth = gridWidth / 9;
+    const cellHeight = gridHeight / 9;
+  
+    // Iterate through recognized symbols
+    data.symbols.forEach((symbol: any) => {
+      const char = symbol.text.trim();
+      const bbox = symbol.bbox
+  
+      if (/^[1-9]$/.test(char)) {
+        // Calculate row and column based on the bounding box center
+        const centerX = (bbox.x0 + bbox.x1) / 2;
+        const centerY = (bbox.y0 + bbox.y1) / 2;
+  
+        const row = Math.floor(centerY / cellHeight);
+        const col = Math.floor(centerX / cellWidth);
+  
+        if (row >= 0 && row < 9 && col >= 0 && col < 9) 
+          grid[row][col] = parseInt(char, 10);
+      }
+    });
   
     return grid;
   };
+  
   const validateSudokuGrid = (grid: (number | null)[][]): boolean => {
-    if (grid.length !== 9) return false; // Ensure 9 rows
-    return grid.every((row) => row.length === 9); // Ensure 9 columns in every row
+    if (grid.length !== 9)
+      return false;
+    return grid.every((row) => row.length === 9);
   };
 
   const updateBoardState = (grid: (number | null)[][]) => {
     setBoard(grid.map((row) => 
       row.map((value) => ({
         value: value,
-        isEditable: value === null, // Editable if the cell is empty
+        isEditable: value === null,
       }))
     ));
   };
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] as File; // Explicitly cast to File
+    const file = e.target.files?.[0];
     if (!file) {
       toast.error("Error when uploading the file! Try again");
       return;
     }
   
     try {
-      // Notify the user that OCR is starting
       toast.info("Processing the image, please wait...");
-      
-      // Use Tesseract.js to perform OCR on the uploaded image
-      const { data } = await Tesseract.recognize(file, "eng");
   
-      // Extract the text from the OCR result
-      const ocrText = data.text;
-      console.log("OCR Text:", ocrText);
+      // Perform OCR
+      const preprocessImage = async (file: File): Promise<Buffer> => {
+        const image = await Jimp.read(await file.arrayBuffer());
+
+        // Preprocessing steps
+        image
+          .greyscale()
+          .contrast(1)
+          .normalize()
+        return (image.getBuffer(JimpMime.png))
+      };
+      const enhancedImage = await preprocessImage(file);
+      const { data } = await Tesseract.recognize(enhancedImage);
+      console.log(data.text);
+
+      // Parse and clean the OCR text
+      const image = await Jimp.read(await file.arrayBuffer())
+      const sudokuGrid = extractGridFromOCR(data, image.width, image.height);
   
-      // Parse the OCR text into a Sudoku grid
-      const sudokuGrid = parseOcrToGrid(ocrText);
-      
-      sudokuGrid.forEach(row => 
-        console.log(row)
-      )
-        
-      // Validate the Sudoku grid
       if (!validateSudokuGrid(sudokuGrid)) {
         toast.error("The extracted grid is invalid. Please upload a clearer image.");
         return;
       }
-  
-      // Update the board state with the recognized Sudoku grid
+
       updateBoardState(sudokuGrid);
-  
+      setDefaultActions()
       toast.success("Image processed successfully!");
     } catch (error) {
       console.error("Error during OCR processing:", error);
@@ -254,9 +317,10 @@ const Board: React.FC<BoardProps> = ({ difficulty }) => {
         isSolved={isSolved}
         onCloseWindow={handleCloseWin}
         title={<>Congratulations <MdCelebration className="congrat-icon"/></>}
-        text={`You beat ${difficulty} level`}
+        text={`You solved it in ${time}`}
       />
       <div className="board">
+        <span className="time">Time: {time}</span>
         {board.map((row, rowIndex) => (
           <div key={rowIndex}>
             {row.map((cell, colIndex) => (
@@ -295,7 +359,7 @@ const Board: React.FC<BoardProps> = ({ difficulty }) => {
         <button className="button undo-btn" onClick={handleUndoButton}>
           <FaUndo style={{position: 'relative', bottom: '-2px'}}/> Undo
         </button>
-        <button className="button check-but" disabled={isEditMode || isSubmitMode} onClick={handleCheckSolution}>
+        <button className={`button check-but`} disabled={isEditMode || isSubmitMode} onClick={handleCheckSolution}>
           <FaCheck style={{position: 'relative', bottom: '-2px'}}/> Check Solution
         </button>
         <button className="button newgame-btn" onClick={handleNewGameClick}>
@@ -311,7 +375,7 @@ const Board: React.FC<BoardProps> = ({ difficulty }) => {
           </button>
         }
 
-        <button className="button hint-btn" onClick={handleHints} disabled={isDisabledHint} prefix={tries.toString()}>
+        <button className={`button hint-btn`} onClick={handleHints} disabled={isDisabledHint} prefix={tries.toString()}>
           {" "}
           <FaQuestionCircle style={{position: 'relative', bottom: '-2px'}}/> hint
         </button>

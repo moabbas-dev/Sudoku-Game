@@ -111,7 +111,7 @@ export const solveBoard = (board: CellType[][]) => {
 	return board
 }
 
-const cleanBoard = (board: CellType[][]) => {
+export const cleanBoard = (board: CellType[][]) => {
 	return board.map(row =>
 		row.map(cell =>
 			cell.isEditable && cell.value !== null ? { ...cell, value: null } : cell
