@@ -9,6 +9,7 @@ export const difficultyLevels = {
 	'Expert': 25,
 };
 
+
 // check if a specific cell makes conflict or no
 const isValidPlacement = (board: CellType[][], row: number, col: number, num: number): boolean => {
 	// check cell's row and column

@@ -24,7 +24,7 @@ const Board: React.FC<BoardProps> = ({ difficulty }) => {
 
   // Use States
   const [board, setBoard] = useState<CellType[][]>(initialBoard);
-  const [selectedCell, setSelectedCell] = useState<SelectedCell | null>({row:4, col:4, value: null});
+  const [selectedCell, setSelectedCell] = useState<SelectedCell | null>(null);
   const [isSolved, setIsSolved] = useState<boolean | null>(null);
   const [isEditMode, setEditMode] = useState<boolean>(false)
   const [isSubmitMode, setSubmitMode] = useState<boolean>(false)
@@ -79,15 +79,14 @@ const Board: React.FC<BoardProps> = ({ difficulty }) => {
   // [Handler]: click on a number from 1 to 9
   const handleNumberClick = (number: number) => {
     if (selectedCell && board[selectedCell.row][selectedCell.col].isEditable) {
-        setUndoStack(prevStack => 
-          [...prevStack,  { row: selectedCell.row, col: selectedCell.col, previousValue:selectedCell.value }]
+      setUndoStack(prevStack => 
+        [...prevStack,  { row: selectedCell.row, col: selectedCell.col, previousValue:selectedCell.value }])
+      const updatedBoard = board.map((r, rIdx) =>
+        r.map((cell, cIdx) =>
+          rIdx === selectedCell.row && cIdx === selectedCell.col ? { ...cell, value: number } : cell
         )
-        const updatedBoard = board.map((r, rIdx) =>
-          r.map((cell, cIdx) =>
-            rIdx === selectedCell.row && cIdx === selectedCell.col ? { ...cell, value: number } : cell
-          )
-        );
-        setBoard(updatedBoard);
+      );
+      setBoard(updatedBoard);
     }
   };
 
@@ -100,6 +99,8 @@ const Board: React.FC<BoardProps> = ({ difficulty }) => {
         rIdx === rowIndex && cIdx === colIndex? { ...cell, value: newValue } : cell
       )
     );
+    if (selectedCell !== null)
+      setSelectedCell({row: selectedCell?.row, col: selectedCell?.col, value: newValue})
     setBoard(updatedBoard);
   };
 
