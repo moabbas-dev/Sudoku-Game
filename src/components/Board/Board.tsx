@@ -99,8 +99,8 @@ const Board: React.FC<BoardProps> = ({ difficulty }) => {
         rIdx === rowIndex && cIdx === colIndex? { ...cell, value: newValue } : cell
       )
     );
-    if (selectedCell !== null)
-      setSelectedCell({row: selectedCell?.row, col: selectedCell?.col, value: newValue})
+    if (selectedCell)
+      setSelectedCell({...selectedCell, value: newValue})
     setBoard(updatedBoard);
   };
 
